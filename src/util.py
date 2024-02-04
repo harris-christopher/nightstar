@@ -11,6 +11,7 @@ def get_file_paths(path: Path, ext: str):
             for filename in filenames if filename.endswith(ext)
         ]
 
+    file_paths.sort()
     return file_paths
 
 

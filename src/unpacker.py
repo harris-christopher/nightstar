@@ -2,10 +2,10 @@ import logging
 from pathlib import Path
 from typing import Iterator, List, Match
 
-from src import delimiter as dl
+from src import repl as rp
 from src import regex as rx
 from src.util import get_file_paths
-LOGGER = logging.getLogger(__name__)
+LOGGER = logging.getLogger("nightstar")
 
 
 class Unpacker:
@@ -16,6 +16,9 @@ class Unpacker:
 
     def unpack(self):
         LOGGER.info(f"{self.__class__.__name__} Starting...")
+        with open(self.path_corpus, "w", encoding="windows-1251") as fp:
+            fp.write("--- NIGHTSTAR CORPUS FILE ---\n\n")
+
         for filepath in self.filepaths:
             self.current_file = filepath
             LOGGER.debug(f"|{filepath.name}| Processing...")
@@ -67,9 +70,10 @@ class Unpacker:
                 text_unpacked = self.process_multiline_match(line_iter, match_text_multiline)
           
             if text_unpacked:
+                for repl_item, repl_value in rp.BASE.items():
+                    text_unpacked = text_unpacked.replace(repl_item, repl_value)
+
                 line_parsed = f"<{current_id}>{text_unpacked}"
-                line_parsed = line_parsed.replace("\\n", dl.NEWLINE)
-                line_parsed = line_parsed.replace("\\r\\n", "")
                 content.append(line_parsed)
 
         return content
@@ -87,7 +91,7 @@ class Unpacker:
         line = next(line_iter)
         while not rx.XML_TEXT_MULTILINE_END.search(line):
             LOGGER.debug(f"Match - Multiline: General")
-            text_unpacked.append(line[:-1])
+            text_unpacked.append(line[:-1])  # Strip out last newline char
             line = next(line_iter)
 
         # Handle End Line
@@ -97,5 +101,5 @@ class Unpacker:
             LOGGER.debug("Match - Multiline: End")
             text_unpacked.append(text_multiline_end)
 
-        text_unpacked_flattened = dl.NEWLINE_FILE.join(text_unpacked)
+        text_unpacked_flattened = rp.NEWLINE_XML.join(text_unpacked)
         return text_unpacked_flattened

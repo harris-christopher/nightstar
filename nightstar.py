@@ -4,7 +4,9 @@ from pathlib import Path
 
 from src.unpacker import Unpacker
 
-LOGGER = logging.getLogger(__name__)
+logging.basicConfig()
+LOGGER = logging.getLogger("nightstar")
+LOGGER.setLevel(logging.INFO)
 
 
 def run():
